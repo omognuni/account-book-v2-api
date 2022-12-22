@@ -1,4 +1,5 @@
 from rest_framework import status
+from rest_framework.serializers import ValidationError
 from rest_framework.test import APIClient
 
 from django.test import TestCase
@@ -6,9 +7,9 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 
 
-CREATE_USER_URL = reverse('user:create')
+REGISTER_URL = reverse('user:create')
 TOKEN_URL = reverse('user:token')
-LOGOUT_URL = reverse('user:logout')
+LOGIN_URL = reverse('user:login')
 
 
 def create_user(**params):
@@ -16,19 +17,19 @@ def create_user(**params):
 
 
 class PublicAPITest(TestCase):
-    '''public user api Å×½ºÆ®'''
+    '''public user api í…ŒìŠ¤íŠ¸'''
 
     def setUp(self):
         self.client = APIClient()
 
     def test_create_user_success(self):
-        '''È¸¿ø°¡ÀÔ Å×½ºÆ®'''
+        '''íšŒì›ê°€ì… í…ŒìŠ¤íŠ¸'''
         payload = {
             'email': 'test@gmail.com',
             'password': 'testpass',
         }
 
-        res = self.client.post(CREATE_USER_URL, payload)
+        res = self.client.post(REGISTER_URL, payload)
 
         user = get_user_model().objects.get(email=payload['email'])
 
@@ -37,13 +38,13 @@ class PublicAPITest(TestCase):
         self.assertNotIn('password', res.data)
 
     def test_password_too_short_error(self):
-        '''ÂªÀº ºñ¹Ğ¹øÈ£ ÀÔ·Â ½Ã ¿¡·¯ '''
+        '''ì§§ì€ ë¹„ë°€ë²ˆí˜¸ ì…ë ¥ ì‹œ ì—ëŸ¬ '''
         payload = {
             'email': 'test@gmail.com',
             'password': 'pw',
             'name': 'test name',
         }
-        res = self.client.post(CREATE_USER_URL, payload)
+        res = self.client.post(REGISTER_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         user_exists = get_user_model().objects.filter(
@@ -51,58 +52,33 @@ class PublicAPITest(TestCase):
         ).exists()
         self.assertFalse(user_exists)
 
-    def test_create_token_for_user(self):
-        '''·Î±×ÀÎ ½Ã ÅäÅ« »ı¼º'''
+    def test_login(self):
+        '''ë¡œê·¸ì¸ í…ŒìŠ¤íŠ¸'''
         payload = {
             'email': 'test@gmail.com',
             'password': 'testpass',
         }
-
         get_user_model().objects.create_user(**payload)
 
-        res = self.client.post(TOKEN_URL, payload)
+        res = self.client.post(LOGIN_URL, payload)
 
-        self.assertIn('token', res.data)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('access', res.data)
 
     def test_create_token_invalid_credentials(self):
-        '''Àß¸øµÈ °èÁ¤ ÀÔ·Â ½Ã ÅäÅ« ¹Ì»ı¼º'''
+        '''ì˜ëª»ëœ ê³„ì • ì…ë ¥ ì‹œ í† í° ë¯¸ìƒì„±'''
         payload1 = {
             'email': 'test@gmail.com',
             'password': 'testpass',
         }
-        res = self.client.post(CREATE_USER_URL, payload1)
+        self.client.post(REGISTER_URL, payload1)
 
         payload2 = {
             'email': 'test@gmail.com',
             'password': 'wrong',
         }
 
-        res = self.client.post(TOKEN_URL, payload2)
+        res = self.client.post(LOGIN_URL, payload2)
 
-        self.assertNotIn('token', res.data)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-
-
-class PrivateAPITest(TestCase):
-    '''·Î±×ÀÎ »ç¿ëÀÚ API Å×½ºÆ®'''
-
-    def setUp(self):
-        user = {
-            'email': 'test@gmail.com',
-            'password': 'testpass',
-        }
-        self.user = create_user(**user)
-        self.client = APIClient()
-
-        res = self.client.post(TOKEN_URL, user)
-
-        self.client.force_authenticate(
-            user=self.user, token=self.user.auth_token)
-
-    def test_logout_delete_token(self):
-        '''·Î±×¾Æ¿ô ½Ã ÅäÅ« »èÁ¦'''
-        res = self.client.get(LOGOUT_URL)
-        self.user.refresh_from_db()
-
-        self.assertFalse(hasattr(self.user, 'auth_token'))
+        self.assertNotIn('access', res.data)
