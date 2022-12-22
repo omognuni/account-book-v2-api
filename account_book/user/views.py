@@ -23,4 +23,4 @@ class UserLoginView(APIView):
         serializer = self.serializer_class(data=request.data)
         valid = serializer.is_valid(raise_exception=True)
         if valid:
-            return Response(status=status.HTTP_200_OK, data=serializer.validated_data)
+            return Response(status=status.HTTP_200_OK, data=serializer.data)
