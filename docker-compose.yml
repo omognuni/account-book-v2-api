@@ -20,9 +20,11 @@ services:
       - DB_NAME=account_book
       - DB_USER=root
       - DB_PASS=account
+      - PORT=8000
 
     depends_on:
       - account_book_db
+      - account_book_redis
 
   account_book_db:
     image: mysql:5.7
@@ -38,6 +40,13 @@ services:
 
     ports:
       - "3306:3306"
+
+
+  account_book_redis:
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:6379"
 
 volumes:
   account-book-db-data:
