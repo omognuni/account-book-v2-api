@@ -1,15 +1,25 @@
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.test import TestCase
+from django.conf import settings
 
 from rest_framework import status
 from rest_framework.test import APIClient
 
 from record.serializers import RecordSerializer, RecordDetailSerializer
+from record import shortener
 from core.models import Record
 
 
 RECORD_URL = reverse('record:record-list')
+
+
+def copy_url(record_id):
+    return reverse('record:record-copy-detail', args=[record_id])
+
+
+def share_url(record_id):
+    return reverse('record:record-share-url', args=[record_id])
 
 
 def detail_url(record_id):
@@ -151,3 +161,52 @@ class PrivateAPITest(TestCase):
         for k, v in payload.items():
             self.assertEqual(getattr(record, k), v)
         self.assertEqual(record.user, self.user)
+
+    def test_copy_details(self):
+        '''세부 내역 복제 테스트'''
+        payload = {
+            'amount': 10000,
+            'category': 'cash',
+            'memo': 'test memo',
+        }
+
+        record = create_record(
+            user=self.user,
+            **payload
+        )
+
+        res = self.client.post(copy_url(record.id))
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertNotEqual(res.data['id'], record)
+
+        for k, v in payload.items():
+            self.assertEqual(getattr(record, k), v)
+
+    def test_create_share_url(self):
+        '''내역 공유 단축 url 생성 테스트'''
+        record = create_record(
+            user=self.user,
+            amount=10000,
+            memo='test memo'
+        )
+        res = self.client.post(share_url(record.id))
+        shorten_url = shortener.encode(record.id)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertNotEqual(res.data, settings.SITE_URL + '/' +
+                            f'{shorten_url}')
+
+    def test_redirect_share_url(self):
+        '''내역 공유 단축 url redirect 테스트'''
+        record = create_record(
+            user=self.user,
+            amount=10000,
+            memo='test memo'
+        )
+
+        res = self.client.post(share_url(record.id))
+        new_url = res.data
+        res = self.client.get(new_url)
+
+        self.assertEqual(res.status_code, status.HTTP_302_FOUND)
