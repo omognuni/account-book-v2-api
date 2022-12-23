@@ -1,6 +1,6 @@
 # 가계부 API
 
-### 설치
+## 설치
 - git clone 후 다음 명령어 실행
 ```
 docker-compose up --build
@@ -24,11 +24,11 @@ docker-compose run --rm account_book sh -c 'python manage.py test'
   
 <img src='./images/test.PNG'>
 
-### ERD
-- DB는 MySQL 5.7 사용
+## ERD
+- DDL 파일은 ./src 경로 참조
 <img src='./images/ERD.png'>
 
-### User
+## User
 | 내용             | Method | URL                |
 | ---------------- | ------ | ------------------ |
 | 회원가입         | POST   | api/v1/user/create |
@@ -40,7 +40,7 @@ docker-compose run --rm account_book sh -c 'python manage.py test'
   - 로그인 시 토큰 발행
 
 
-### 가계부 내역(Record)
+## 가계부 내역(Record)
 
 | 내용      | Method    | URL                                  |
 | --------- | --------- | ------------------------------------ |
@@ -61,8 +61,8 @@ docker-compose run --rm account_book sh -c 'python manage.py test'
   - created_at: 생성 시간
   - updated_at: 업데이트 시간
 - 내역 복제
-  - 복제할 record 에서 id를 변경하여 저장
+  - 복제할 record 에서 id값을 변경하여 저장
 - 내역 공유
-  - 공유할 record 의 url 를 value로 생성
-  - base62와 random.sample 함수를 이용하여 임의의 url 생성하여 캐시에 10분간 저장
-  - 여러 번 생성 되는 것을 막기 위해 record{pk}를 key로, 단축 url을 value로 캐시에 저장하여 다시 요청시 value 값으로 응답
+  - 공유할 **record의 url**을 **value**로 **base62**와 **random.sample** 함수를 이용하여 **임의의 url**을 생성
+  - 임의의 url을 **key**로 캐시에 10분간 저장 + 해당 url 과 **201**로 응답
+  - 여러 번 생성 되는 것을 막기 위해 **record{pk}**를 **key**로, **단축 url**을 value로 캐시에 저장하여 다시 요청시 value 값과 **200**으로 응답
