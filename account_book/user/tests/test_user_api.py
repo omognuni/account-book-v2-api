@@ -66,12 +66,12 @@ class PublicAPITest(TestCase):
         self.assertIn('access', res.data)
 
     def test_create_token_invalid_credentials(self):
-        '''잘못된 계정 입력 시 토큰 미생성'''
+        '''잘못된 비밀번호 입력 시 토큰 미생성'''
         payload1 = {
             'email': 'test@gmail.com',
             'password': 'testpass',
         }
-        self.client.post(REGISTER_URL, payload1)
+        get_user_model().objects.create_user(**payload1)
 
         payload2 = {
             'email': 'test@gmail.com',
