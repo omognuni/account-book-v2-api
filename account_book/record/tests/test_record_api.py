@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.test import TestCase
 from django.conf import settings
+from django.core.cache import cache
 
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -47,11 +48,13 @@ class PublicAPITest(TestCase):
 
     def setUp(self):
         self.client = APIClient()
+        cache.clear()
+
+    def tearDown(self):
+        cache.clear()
 
     def test_auth_required(self):
         '''인증 요구 테스트'''
-        user = create_user()
-
         res = self.client.get(RECORD_URL)
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -191,11 +194,20 @@ class PrivateAPITest(TestCase):
             memo='test memo'
         )
         res = self.client.post(share_url(record.id))
-        shorten_url = shortener.encode(record.id)
-
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        self.assertNotEqual(res.data, settings.SITE_URL + '/' +
-                            f'{shorten_url}')
+
+    def test_create_share_url(self):
+        '''내역 공유 단축 url 연속 생성 시 cache에서 가져오기 테스트'''
+        record = create_record(
+            user=self.user,
+            amount=10000,
+            memo='test memo'
+        )
+        res1 = self.client.post(share_url(record.id))
+        self.assertEqual(res1.status_code, status.HTTP_201_CREATED)
+
+        res2 = self.client.post(share_url(record.id))
+        self.assertEqual(res2.status_code, status.HTTP_200_OK)
 
     def test_redirect_share_url(self):
         '''내역 공유 단축 url redirect 테스트'''

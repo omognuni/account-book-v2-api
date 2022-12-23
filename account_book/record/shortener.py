@@ -11,6 +11,7 @@ words = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
          '4', '5', '6', '7', '8', '9',]
 
 
-def encode(index):
+def encode():
+    '''record id를 base62 기법으로 랜덤하게 변환'''
     result = "".join(random.sample(words, 6))
     return result
