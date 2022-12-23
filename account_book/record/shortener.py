@@ -14,17 +14,3 @@ words = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
 def encode(index):
     result = "".join(random.sample(words, 6))
     return result
-
-
-def decode(string):
-    base = 62
-    strlen = len(string)
-    num = 0
-
-    idx = 0
-    for char in string:
-        power = (strlen - (idx+1))
-        num += words.index(char) * (base**power)
-        idx += 1
-
-    return num
