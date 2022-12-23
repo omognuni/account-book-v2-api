@@ -30,7 +30,7 @@ class RecordViewSet(viewsets.ModelViewSet):
     queryset = Record.objects.all()
 
     def get_queryset(self):
-        '''요청한 유저의 삭제되지 않은 내역만 필터'''
+        '''요청한 유저의 가 생성한 내역만 필터'''
         queryset = self.queryset.filter(
             user=self.request.user)
 
