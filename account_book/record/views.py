@@ -63,12 +63,13 @@ class RecordViewSet(viewsets.ModelViewSet):
             record.save()
             serializer = self.get_serializer(record)
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     @extend_schema(description='record id로 세부 내역 공유 단축 url 생성', methods=['POST'])
     @action(methods=['POST'], detail=True, url_path='share-url')
     def share_url(self, request, pk=None):
         '''세부 내역 공유'''
-        short_url = shortener.encode()
+        short_url = shortener.encode(pk)
         key = f'record{pk}'
         if cache.get(key):
             new_url = settings.SITE_URL + '/' + str(cache.get(key))
