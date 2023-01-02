@@ -63,7 +63,7 @@ docker-compose run --rm account_book sh -c 'python manage.py test'
 - 내역 복제
   - 복제할 record 에서 id값을 변경하여 저장
 - 내역 공유
-  - 공유할 **record의 url**을 **value**로 **base62**와 **random.sample** 함수를 이용하여 **임의의 url**을 생성
-  - 임의의 url을 **key**로 캐시에 10분간 저장 + 해당 url 과 **201**로 응답
-  - 여러 번 생성 되는 것을 막기 위해 **record{pk}**를 **key**로, **단축 url**을 value로 캐시에 저장하여 다시 요청시 value 값과 **200**으로 응답
+  - {**record의 primary key** + **base62**와 **random.sample** 함수를 이용하여 **생성된 문자열**}로 **임의의 url**을 생성
+  - 공유할 **record의 url**을 **value**로, **임의의 url**을 **key**로 캐시에 10분간 저장 + 해당 url 과 **201**로 응답
+  - 여러 번 생성 되는 것을 막기 위해 **record**{**pk**}를 **key**로, **단축 url**을 value로 캐시에 저장하여 다시 요청시 value 값과 **200**으로 응답
   -  **단축 url**을 클릭하면 캐시에서 해당 **단축 url**을 **key**로 가지는 **경로 value**로 **redirect**
