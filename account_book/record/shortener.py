@@ -11,7 +11,7 @@ words = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
          '4', '5', '6', '7', '8', '9',]
 
 
-def encode(pk):
-    '''단축 url을 pk + base62 기법으로 랜덤하게 생성'''
-    result = pk + "".join(random.sample(words, 6))
+def encode():
+    '''단축 url을 base62로 랜덤하게 생성'''
+    result = "".join(random.sample(words, 6))
     return result

@@ -69,7 +69,7 @@ class RecordViewSet(viewsets.ModelViewSet):
     @action(methods=['POST'], detail=True, url_path='share-url')
     def share_url(self, request, pk=None):
         '''세부 내역 공유'''
-        short_url = shortener.encode(pk)
+        short_url = shortener.encode()
         key = f'record{pk}'
         if cache.get(key):
             new_url = settings.SITE_URL + '/' + str(cache.get(key))
